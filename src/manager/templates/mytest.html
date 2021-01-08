@@ -1,0 +1,18 @@
+{% extends 'main_template.html' %}
+
+{% block test %}
+    <p class="text-success">Пользователь: {{ user }}</p>
+    <a href="{% url 'the-main-page' %}">
+        <h6>Главная</h6>
+    </a>
+
+    <a href="{% url 'my-test' %}">
+        <i>
+            <input class="btn" type="button" value="My Test">
+        </i>
+    </a>
+
+
+    {{ res_url }}
+
+{% endblock %}

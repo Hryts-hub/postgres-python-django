@@ -1,0 +1,124 @@
+{% extends 'main_template.html' %}
+
+{% block title %} Главная {% endblock %}
+
+{% block main %}
+
+{% for msg in messages %}
+    <p class="text-danger">{{ msg }}</p>
+{% endfor %}
+
+
+<h1><p class="bg-info text-white">
+    Главная
+</p></h1>
+<h3>Фильтр жанров: </h3>
+{% for genre in genres_all %}
+    <a href="{% url 'books-genre' genre=genre %}">
+        <i>
+            <input class="btn btn-info" type="button" value= {{ genre }}>
+        </i>
+    </a>
+{% endfor %}
+
+<br>
+<a href="{% url 'login' %}">login</a>
+
+<p class="text-success">Пользователь: {{ user }}</p>
+
+<a href="{% url 'logout' %}">logout</a>
+<br>
+<a href="{% url 'register' %}">Register</a>
+
+    {% for b in page_obj %}
+         <a href="{% url 'book-detail' slug=b.slug %}">
+             <h1>
+                 {{ b.title }}
+                 {% if b.is_liked %}
+                    <span class="fa fa-star checked"></span>
+                 {% endif %}
+             </h1>
+         </a>
+
+        <h6>
+            Жанр:
+            {% for genre in b.genres.all %}
+            <span class="badge">
+                {{ genre }}
+            </span>
+            {% endfor %}
+        </h6>
+        <h2>{{ b.date }}</h2>
+        <h3>{{ b.text }}</h3>
+        <h4>
+            Авторы книги:
+            {% for author in b.authors.all %}
+                {{ author }}
+            {% endfor %}
+        </h4>
+        <h5>Число голосов: {{ b.count_rated_users }}</h5>
+        {{ b.rate }}
+        {% for i in range %}
+            {% if b.rate >= i %}
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
+                    <span class="fa fa-star checked"></span>
+                </a>
+            {% else %}
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
+                    <span class="fa fa-star"></span>
+                </a>
+            {% endif %}
+        {% endfor %}
+        <br>
+        {% if b.is_owner %}
+            <a href="{% url 'delete-book' slug=b.slug %}">
+                <i>
+                    <input class="btn btn-warning" type="button" value="Delete book">
+                </i>
+            </a>
+            <a href="{% url 'update-book' slug=b.slug %}">
+                <i>
+                    <input class="btn btn-success" type="button" value="Update book">
+                </i>
+            </a>
+        {% endif %}
+    {% endfor %}
+<br>
+
+<br>
+{% if user.is_authenticated %}
+<br>
+{% for msg in messages %}
+    <p class="text-danger">{{ msg }}</p>
+{% endfor %}
+<h3>{{ user }} , вы можете добавить книгу!</h3>
+<form action="{% url 'add-book' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="OK">
+</form>
+{% endif %}
+
+<ul class="pagination">
+    <li class="page-item">
+
+        <a class="page-link" href="?page=1">start</a>
+
+        {% if page_obj.has_previous %}
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+        {% endif %}
+
+         <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">end</a>
+    </li>
+</ul>
+
+{% endblock %}
+

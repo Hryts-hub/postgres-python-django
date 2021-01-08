@@ -1,0 +1,101 @@
+{% extends 'main_template.html' %}
+
+{% block title %} {{book.title}} {% endblock %}
+
+{% block detail %}
+<a href="{% url 'the-main-page' %}">
+    <h6>Главная</h6>
+</a>
+<p class="text-success">Пользователь: {{ user }}</p>
+{% for msg in messages %}
+    <p class="text-danger">{{ msg }}</p>
+{% endfor %}
+<h1>
+    {{ book.title }}
+    {% if book.is_liked %}
+        <span class="fa fa-star checked"></span>
+    {% endif %}
+</h1>
+<img src="{{ book.book_img.url}}" alt="{{ book.title }}" style="padding: 9px;max-width: 400px;max-height: 400px;">
+
+<h6>
+    Жанр:
+    {% for genre in book.genres.all %}
+    <span class="badge">
+        {{ genre }}
+    </span>
+    {% endfor %}
+</h6>
+<h2>{{ book.date }}</h2>
+<h3>{{ book.text }}</h3>
+<h4>
+    Авторы книги:
+    {% for author in book.authors.all %}
+    <h6>{{ author }}</h6>
+    {% endfor %}
+</h4>
+
+<h4>Число голосов: {{ book.count_rated_users }}</h4>
+{{ book.rate }}
+{% for i in range %}
+    {% if book.rate >= i %}
+        <a href="{% url 'add-rate-location' slug=book.slug rate=i location=1 %}">
+            <span class="fa fa-star checked"></span>
+        </a>
+    {% else %}
+        <a href="{% url 'add-rate-location' slug=book.slug rate=i location=1 %}">
+            <span class="fa fa-star"></span>
+        </a>
+    {% endif %}
+{% endfor %}
+{% if book.is_owner %}
+    <a href="{% url 'delete-book' slug=book.slug %}">
+        <i>
+            <input class="btn btn-warning" type="button" value="Delete book">
+        </i>
+    </a>
+    <a href="{% url 'update-book' slug=book.slug %}">
+        <i>
+            <input class="btn btn-success" type="button" value="Update book">
+        </i>
+    </a>
+{% endif %}
+<br>
+<h6>Число комментариев: {{ book.count_comment }}</h6>
+
+{% for comment in book.comments.all %}
+    <br>
+    <h4>{{ comment.text }}</h4>
+    <h5>{{ comment.date }}</h5>
+    <h6>Автор комментария: {{ comment.author }}</h6>
+    <a href="{% url 'add-like-to-comment-location' slug=book.slug id_comment=comment.id location=1 %}">
+        <h4>
+            Likes: {{ comment.likes }}
+            {% if comment.is_liked %}
+                <span class="fa fa-star checked"></span>
+            {% endif %}
+        </h4>
+    </a>
+    {% if comment.is_owner %}
+        <a href="{% url 'delete-comment' slug=book.slug id_comment=comment.id %}">
+            <i>
+                <input class="btn btn-warning" type="button" value="Delete comment">
+            </i>
+        </a>
+        <a href="{% url 'update-comment' slug=book.slug id_comment=comment.id %}">
+            <i>
+                <input class="btn btn-success" type="button" value="Update comment">
+            </i>
+        </a>
+    {% endif %}
+{% endfor %}
+
+{% if user.is_authenticated %}
+<form action="{% url 'add-comment-location' slug=book.slug location=1 %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="OK">
+</form>
+{% endif %}
+
+{% endblock %}

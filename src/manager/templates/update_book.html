@@ -1,0 +1,32 @@
+{% extends 'main_template.html' %}
+
+{% block title %} {{book.title}} {% endblock %}
+
+{% block update_book %}
+
+<a href="{% url 'the-main-page' %}">
+    <h6>Главная</h6>
+</a>
+{% for msg in messages %}
+    <p class="text-danger">{{ msg }}</p>
+{% endfor %}
+<h3>Книга: {{book.title}}</h3>
+
+<form action="{% url 'update-book' slug=slug %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <br>
+    <input type="submit" value="Обновить книгу">
+</form>
+
+<form action="{% url 'update-book-author' slug=book.slug %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="text">Добавьте автора:</label>
+        <input class="form-control" type="text" id="text" name='text' placeholder="Еще + автор"></input>
+    </div>
+    <input type="submit" value="OK">
+</form>
+
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'main_template.html' %}
+
+{% block login %}
+<p class="text-success">Пользователь: {{ user }}</p>
+<a href="{% url 'the-main-page' %}">
+    <h6>Главная</h6>
+</a>
+<h3>Войти</h3>
+
+{% for msg in messages %}
+     <p class="text-danger">{{ msg }}</p>
+{% endfor %}
+
+<form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="OK">
+</form>
+
+{% endblock %}

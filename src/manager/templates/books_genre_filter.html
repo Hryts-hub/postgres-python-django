@@ -1,0 +1,72 @@
+{% extends 'main_template.html' %}
+
+{% block title %} Фильрт жанров {% endblock %}
+
+{% block genre_filter %}
+
+<h1><p class="bg-info text-white">
+    Фильтр {{ genre }}
+</p></h1>
+
+<a href="{% url 'the-main-page' %}">
+    <h6>Главная</h6>
+</a>
+<p class="text-success">Пользователь: {{ user }}</p>
+
+    {% for b in books %}
+         <a href="{% url 'book-detail' slug=b.slug %}">
+             <h1>
+                 {{ b.title }}
+                 {% if b.is_liked %}
+                    <span class="fa fa-star checked"></span>
+                 {% endif %}
+             </h1>
+         </a>
+        <h6>
+            Жанр:
+            {% for genre in b.genres.all %}
+            <span class="badge">
+                {{ genre }}
+            </span>
+            {% endfor %}
+        </h6>
+        <h2>{{ b.date }}</h2>
+        <h3>{{ b.text }}</h3>
+        <h4>
+            Авторы книги:
+            {% for author in b.authors.all %}
+                {{ author }}
+            {% endfor %}
+        </h4>
+        <h5>Число голосов: {{ b.count_rated_users }}</h5>
+        {{ b.rate }}
+        {% for i in range %}
+            {% if b.rate >= i %}
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
+                    <span class="fa fa-star checked"></span>
+                </a>
+            {% else %}
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
+                    <span class="fa fa-star"></span>
+                </a>
+            {% endif %}
+        {% endfor %}
+        <br>
+        {% if b.is_owner %}
+            <a href="{% url 'delete-book' slug=b.slug %}">
+                <i>
+                    <input class="btn btn-warning" type="button" value="Delete book">
+                </i>
+            </a>
+            <a href="{% url 'update-book' slug=b.slug %}">
+                <i>
+                    <input class="btn btn-success" type="button" value="Update book">
+                </i>
+            </a>
+        {% endif %}
+    {% endfor %}
+
+
+
+{% endblock %}
+
