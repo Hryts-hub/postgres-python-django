@@ -111,3 +111,8 @@ class LikeCommentUser(models.Model):
         else:
             self.comment.likes += 1
         self.comment.save()
+
+
+class TableAggregate(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='table_aggregate')
+    result = models.PositiveIntegerField(default=0)

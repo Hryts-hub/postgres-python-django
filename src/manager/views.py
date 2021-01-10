@@ -39,7 +39,7 @@ class MyPage(View):
         # context['books'] = books  #
 
         paginator = Paginator(books, 3)  # Show 3 books per page.
-        page_number = request.GET.get('page')  #
+        page_number = request.GET.get('page', 1)  # number of page or 1
         page_obj = paginator.get_page(page_number)  #
         context['page_obj'] = page_obj  #
 
@@ -54,7 +54,7 @@ class LoginView(View):
         user = AuthenticationForm(data=request.POST)
         if user.is_valid():
             login(request, user.get_user())
-            return redirect("the-main-page")
+            return redirect("the-personal-page")  #
         messages.error(request, user.error_messages)
         return redirect("login")
 
@@ -247,6 +247,14 @@ class UpdateComment(View):
                     cf.save(commit=True)
         return redirect("book-detail", slug=slug)
 
+
+class PersonalView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
+            # gf = GitForm(data=request.POST)
+            pass
+
+        return render(request, "personal_page.html")
 
 # class MyTestView(View):
 #     def get(self, request):

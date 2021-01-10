@@ -47,11 +47,19 @@ services:
   node:
     image: node:latest
     container_name: node_
-    command: sleep 1000000
+    command: sleep 100000
+    # loadtest -n 500 http://web:8000/shop/
 
   celery:
     build:
-      contrxt:
-        dockerfile: celery_dokcer_file
+      context: .
+      dockerfile: django_docker_file
     container_name: celery
     volumes:
+      - ./src:/src
+    env_file:
+      - db_keys.txt
+    depends_on:
+      - db
+      - cache
+    command: sh -c "celery -A book_shop worker -l INFO -B"

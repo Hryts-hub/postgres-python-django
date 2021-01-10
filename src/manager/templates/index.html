@@ -87,16 +87,16 @@
 
 <br>
 {% if user.is_authenticated %}
-<br>
-{% for msg in messages %}
-    <p class="text-danger">{{ msg }}</p>
-{% endfor %}
-<h3>{{ user }} , вы можете добавить книгу!</h3>
-<form action="{% url 'add-book' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="OK">
-</form>
+    <br>
+    {% for msg in messages %}
+        <p class="text-danger">{{ msg }}</p>
+    {% endfor %}
+    <h3>{{ user }} , вы можете добавить книгу!</h3>
+    <form action="{% url 'add-book' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="OK">
+    </form>
 {% endif %}
 
 <ul class="pagination">
