@@ -4,22 +4,30 @@
     <a href="{% url 'the-main-page' %}">
         <h6>Главная</h6>
     </a>
-
-    {{ user }}
+    <h3>Пользователь:        {{ user }}</h3>
 
     {% if user.is_authenticated %}
         {% csrf_token %}
         <a href="{% url 'logout' %}">Logout</a>
 
         {% for g in g_info %}
-            {{ g.result }}
-        {% endfor %}
+            <br>
+            <br>
+            <h4> Последнее обновление:    {{ g.date }}</h4>
+            <br>
+            <h4> Список реп:    {{ g.result }}</h4>
+            <br>
+            <br>
+            <h5>Список прочитанных книг:    {{ my_books }}</h5>
 
+        {% endfor %}
+        <br>
+        <br>
         <h3>+ GitHub info</h3>
         <a href="{{ url }}">Получить данные с GitHub</a>
         <br>
         <br>
-        <h5>Список прочитанных книг: {{ my_books }}</h5>
+
         <br>
         <h5>GitHub аккаунт: {{ login }}</h5>
 

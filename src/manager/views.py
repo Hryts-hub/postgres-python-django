@@ -260,11 +260,12 @@ def personal_view(request):
     GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
     url = f"https://github.com/login/oauth/authorize?client_id={GIT_CLIENT_ID}"
 
+    g_info = 0
     books = Book.objects.prefetch_related("read_users")
     if request.user.is_authenticated:
         books = books.filter(read_users=request.user)
 
-    g_info = GitInfo.objects.all().filter(user_id=request.user)  #
+        g_info = GitInfo.objects.all().filter(user_id=request.user)  #
 
     return render(request, "personal_page.html", {
         "url": url,
@@ -299,7 +300,7 @@ def git_callback(request):
     user_id = request.user.id  #
     git_data = GitInfo.objects.all().filter(user_id=user_id)
     if git_data:
-        GitInfo.objects.all().filter(user_id=user_id).update(
+        git_data.update(
             user_id=user_id,
             date=str(datetime.now()),
             result=str(repos),
