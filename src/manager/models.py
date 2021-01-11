@@ -23,7 +23,7 @@ class Book(models.Model):
         help_text="ну это типо погоняло книги"
     )
     date = models.DateTimeField(auto_now_add=True, null=True)
-    text = models.TextField(verbose_name="содержание",)
+    text = models.TextField(verbose_name="содержание")
     authors = models.ManyToManyField(User, related_name="books")
     count_rated_users = models.PositiveIntegerField(
         default=0)
@@ -38,9 +38,9 @@ class Book(models.Model):
         through="manager.LikeBookUser",
         related_name="liked_books"
     )
-    genres = models.ManyToManyField(Genre, blank=True, related_name="books_genres")  #
-    book_img = models.ImageField(upload_to='images/', default=0, blank=True, null=True)  #
-    read_users = models.ManyToManyField(User, blank=True, related_name="books_read_by_user")  #
+    genres = models.ManyToManyField(Genre, blank=True, related_name="books_genres")
+    book_img = models.ImageField(upload_to='images/', default=0, blank=True, null=True)
+    read_users = models.ManyToManyField(User, blank=True, related_name="books_read_by_user")
 
     def __str__(self):
         return f"{self.title}-{self.slug}"
@@ -117,3 +117,10 @@ class LikeCommentUser(models.Model):
 class TableAggregate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='table_aggregate')
     result = models.PositiveIntegerField(default=0)
+
+
+class GitInfo(models.Model):
+    user = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE, related_name='table_git_info')
+    date = models.CharField(max_length=50, default=0)
+    result = models.TextField()
+    git_login = models.CharField(max_length=50, default=0)

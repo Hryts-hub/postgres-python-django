@@ -152,13 +152,17 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BROKER_URL = 'redis://cache:6379'
-CELERY_RESULT_BACKEND  = 'redis://cache:6379'
+CELERY_RESULT_BACKEND = 'redis://cache:6379'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULE = {
-    "task_one": {
-        "task": "manager.tasks.just_taks",
-        "schedule": 3.0,
+    # "task_one": {
+    #     "task": "manager.tasks.just_taks",
+    #     "schedule": 3.0,
+    # },
+    "task_two": {
+        "task": "manager.tasks.git_info",
+        "schedule": (45 * 60),
     },
 }

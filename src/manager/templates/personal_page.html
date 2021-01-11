@@ -10,6 +10,11 @@
     {% if user.is_authenticated %}
         {% csrf_token %}
         <a href="{% url 'logout' %}">Logout</a>
+
+        {% for g in g_info %}
+            {{ g.result }}
+        {% endfor %}
+
         <h3>+ GitHub info</h3>
         <a href="{{ url }}">Получить данные с GitHub</a>
         <br>

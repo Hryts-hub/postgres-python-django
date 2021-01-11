@@ -1,6 +1,9 @@
 from django.urls import path
-from manager.views import MyPage, AddLike2Comment, AddRate2Book, BookDetail, AddBook, AddComment, book_delete, \
-    UpdateBook, comment_delete, UpdateComment, RegisterView, UpdateBookAuthor, GenreFilter, personal_view, git_callback
+from manager.views import MyPage, AddLike2Comment, AddRate2Book, \
+    BookDetail, AddBook, AddComment, book_delete, \
+    UpdateBook, comment_delete, UpdateComment, RegisterView, \
+    UpdateBookAuthor, GenreFilter, personal_view, git_callback
+
 from manager.views import LoginView, logout_user
 from django.views.decorators.cache import cache_page
 

@@ -4,16 +4,18 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Exists, OuterRef
+from datetime import datetime
 from django.shortcuts import render, redirect
 
 from django.views import View
 from django.contrib.auth.forms import AuthenticationForm
 
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm, BookUpForm
-from manager.models import LikeCommentUser, Comment, Book, Genre
+from manager.models import LikeCommentUser, Comment, Book, Genre, GitInfo
 from manager.models import LikeBookUser as RateBookUser
 
 from pip._vendor.requests import post, get
+from manager.tasks import git_info
 
 
 class MyPage(View):
@@ -27,15 +29,15 @@ class MyPage(View):
             is_liked = Exists(
                 User.objects.filter(liked_books=OuterRef('pk'), id=request.user.id))
             books = books.annotate(is_owner=is_owner, is_liked=is_liked)
-        books = books.order_by("-rate", "date")  #
+        books = books.order_by("-rate", "date")
         context['range'] = range(1, 6)
         context['form'] = BookForm()
         context['login_form'] = AuthenticationForm()
         context['genres_all'] = genres_all
-        # context['books'] = books  #
+        # context['books'] = books
 
         paginator = Paginator(books, 3)
-        page_number = request.GET.get('page', 1)  # number of page or 1
+        page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
         context['page_obj'] = page_obj
 
@@ -109,10 +111,10 @@ class BookDetail(View):
                 User.objects.filter(books=OuterRef('pk'), id=request.user.id))
             is_liked = Exists(
                 User.objects.filter(liked_books=OuterRef('pk'), id=request.user.id))
-            book = book.annotate(is_owner=is_owner, is_liked=is_liked)  # get надо было убрать, случайно оставался....
+            book = book.annotate(is_owner=is_owner, is_liked=is_liked)
         book = book.get(slug=slug)
 
-        if request.user.is_authenticated:  #
+        if request.user.is_authenticated:
             users = User.objects.all()
             read_user = request.user
             if users.filter(username=read_user).exists():
@@ -258,18 +260,26 @@ def personal_view(request):
     GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
     url = f"https://github.com/login/oauth/authorize?client_id={GIT_CLIENT_ID}"
 
-    books = Book.objects.prefetch_related("read_users")  #
-    if request.user.is_authenticated:  #
-        books = books.filter(read_users=request.user)  #
+    books = Book.objects.prefetch_related("read_users")
+    if request.user.is_authenticated:
+        books = books.filter(read_users=request.user)
 
-    return render(request, "personal_page.html", {"url": url, "my_books": books})
+    g_info = GitInfo.objects.all().filter(user_id=request.user)  #
+
+    return render(request, "personal_page.html", {
+        "url": url,
+        "my_books": books,
+        "g_info": g_info,
+        }
+    )
 
 
 def git_callback(request):
     GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
     GIT_CLIENT_SECRET = "2723cc7ab60c2a1ed7208182bb896909362b88df"
     code = request.GET.get("code")
-    url = f"https://github.com/login/oauth/access_token?client_id={GIT_CLIENT_ID}&client_secret={GIT_CLIENT_SECRET}&code={code}"
+    url = f"https://github.com/login/oauth/access_token?" \
+          f"client_id={GIT_CLIENT_ID}&client_secret={GIT_CLIENT_SECRET}&code={code}"
     response = post(url, headers={'Accept': 'application/json'})
     # r = response.json()
     access_token = response.json()['access_token']
@@ -285,6 +295,18 @@ def git_callback(request):
     books = Book.objects.prefetch_related("read_users")
     if request.user.is_authenticated:
         books = books.filter(read_users=request.user)
+
+    user_id = request.user.id  #
+    git_data = GitInfo.objects.all().filter(user_id=user_id)
+    if git_data:
+        GitInfo.objects.all().filter(user_id=user_id).update(
+            user_id=user_id,
+            date=str(datetime.now()),
+            result=str(repos),
+            git_login=login
+        )
+    else:
+        GitInfo.objects.create(user_id=user_id, date=str(datetime.now()), result=str(repos), git_login=login)
 
     return render(request, "personal_page.html", {
         'repos_list': repos,

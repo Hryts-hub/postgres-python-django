@@ -2,7 +2,7 @@ from django.contrib import admin
 from manager.models import Comment
 from manager.models import Book
 from manager.models import Genre
-from manager.models import TableAggregate
+from manager.models import TableAggregate, GitInfo
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -23,4 +23,5 @@ class BookAdmin(admin.ModelAdmin):
 
 admin.site.register(Book, BookAdmin)
 admin.site.register(Genre, GenreAdmin)
-admin.site.register(TableAggregate)  #
+admin.site.register(TableAggregate)
+admin.site.register(GitInfo)
