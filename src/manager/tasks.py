@@ -14,6 +14,7 @@ def create_aggregate(user_id):
 	sleep(10)
 	TableAggregate.objects.create(user_id=user_id, result=int(time()))
 
+
 @shared_task
 def just_taks():
 	return "hello done"

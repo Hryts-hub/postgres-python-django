@@ -2,7 +2,7 @@ from django.contrib.auth import login, logout
 
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.core.paginator import Paginator  #
+from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Exists, OuterRef
 from django.shortcuts import render, redirect
 
@@ -13,11 +13,7 @@ from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, Custo
 from manager.models import LikeCommentUser, Comment, Book, Genre
 from manager.models import LikeBookUser as RateBookUser
 
-import json
-import requests
-import webbrowser
-import base64
-from django.http import HttpResponse
+from pip._vendor.requests import post, get
 
 
 class MyPage(View):
@@ -38,10 +34,10 @@ class MyPage(View):
         context['genres_all'] = genres_all
         # context['books'] = books  #
 
-        paginator = Paginator(books, 3)  # Show 3 books per page.
+        paginator = Paginator(books, 3)
         page_number = request.GET.get('page', 1)  # number of page or 1
-        page_obj = paginator.get_page(page_number)  #
-        context['page_obj'] = page_obj  #
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
 
         return render(request, "index.html", context)
 
@@ -54,7 +50,7 @@ class LoginView(View):
         user = AuthenticationForm(data=request.POST)
         if user.is_valid():
             login(request, user.get_user())
-            return redirect("the-personal-page")  #
+            return redirect("the-personal-page")
         messages.error(request, user.error_messages)
         return redirect("login")
 
@@ -113,7 +109,17 @@ class BookDetail(View):
                 User.objects.filter(books=OuterRef('pk'), id=request.user.id))
             is_liked = Exists(
                 User.objects.filter(liked_books=OuterRef('pk'), id=request.user.id))
-            book = book.annotate(is_owner=is_owner, is_liked=is_liked).get(slug=slug)
+            book = book.annotate(is_owner=is_owner, is_liked=is_liked)  # get надо было убрать, случайно оставался....
+        book = book.get(slug=slug)
+
+        if request.user.is_authenticated:  #
+            users = User.objects.all()
+            read_user = request.user
+            if users.filter(username=read_user).exists():
+                read_users_id = users.get(username=read_user).id
+                book.read_users.add(read_users_id)
+                book.save()
+
         return render(request, "book_detail.html", {
             "book": book,
             "range": range(1, 6),
@@ -248,71 +254,42 @@ class UpdateComment(View):
         return redirect("book-detail", slug=slug)
 
 
-class PersonalView(View):
-    def get(self, request):
-        if request.user.is_authenticated:
-            # gf = GitForm(data=request.POST)
-            pass
+def personal_view(request):
+    GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
+    url = f"https://github.com/login/oauth/authorize?client_id={GIT_CLIENT_ID}"
 
-        return render(request, "personal_page.html")
+    books = Book.objects.prefetch_related("read_users")  #
+    if request.user.is_authenticated:  #
+        books = books.filter(read_users=request.user)  #
 
-# class MyTestView(View):
-#     def get(self, request):
-#         return render(request, "mytest.html",)
+    return render(request, "personal_page.html", {"url": url, "my_books": books})
 
-client_id = '67034e1bad91d3ff3c17'
-client_secret = 'c710b86e7855508ba8df41cd147d6e487857f9fe'
-redirect_uri = 'http://127.0.0.1:8000/shop/mytest/'
-login = 'Hryts-hub'
-scope = 'public_repo'
-# b64_id_secret = base64.b64encode(bytes(client_id + ':' + client_secret, 'utf-8')).decode('utf-8')
-# allow_signup = False
 
-def XeroFirstAuth(request):
-    # 1. Send a user to authorize your app
-    auth_url = ('''https://github.com/login/oauth/authorize?''' +
-                '''response_type=code''' +
-                '''&client_id=''' + client_id +
-                '''&redirect_uri=''' + redirect_uri +
-                '''&scope=''' + scope +
-                '''&state=123''' +
-                '''&allow_signup=False ''')
-    webbrowser.open_new(auth_url)
-    # return redirect(auth_url)
+def git_callback(request):
+    GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
+    GIT_CLIENT_SECRET = "2723cc7ab60c2a1ed7208182bb896909362b88df"
+    code = request.GET.get("code")
+    url = f"https://github.com/login/oauth/access_token?client_id={GIT_CLIENT_ID}&client_secret={GIT_CLIENT_SECRET}&code={code}"
+    response = post(url, headers={'Accept': 'application/json'})
+    # r = response.json()
+    access_token = response.json()['access_token']
+    url = "https://api.github.com/user"
+    response = get(url, headers={'Authorization': f'token {access_token}'})
+    r = response.json()
+    login = r['login']
+    count_repos = r['public_repos']
+    url = f"https://api.github.com/users/{login}/repos"
+    response = get(url)
+    repos = [i['name'] for i in response.json()]
 
-    # 2. Users are redirected back to you with a code
+    books = Book.objects.prefetch_related("read_users")
+    if request.user.is_authenticated:
+        books = books.filter(read_users=request.user)
 
-    auth_res_url = request.GET
-    # auth_res_url = "http://127.0.0.1:8000/shop/mytest/?code=cfa0aa657e7f29afd126&state=123"  # request.GET
-    # return HttpResponse(auth_res_url)
-    #
-    # start_number = auth_res_url.find('code=') + len('code=')
-    # end_number = auth_res_url.find('&scope')
-    # auth_code = auth_res_url[start_number:end_number]
-    auth_code = "8506b9a057ac1e5adc87" #auth_res_url[start_number:end_number]
-    # print(auth_code)
-    # print('\n')
-
-    # 3. Exchange the code
-    exchange_code_url = 'https://github.com/login/oauth/access_token'
-    response = requests.post(exchange_code_url,
-                             headers={
-                                 'Authorization': 'token OAUTH-TOKEN'
-                             },
-                             data={
-                                 'client_id': client_id,
-                                 'client_secret': client_secret,
-                                 'code': auth_code,
-                                 # 'redirect_uri': redirect_uri,
-                                 # 'state': "123"
-                             })
-    json_response = response.json()
-    a = json_response['access_token']
-    return HttpResponse(a)
-    json_response = response.json()
-    # print(json_response)
-    # print('\n')
-
-    # 4. Receive your tokens
-    return [json_response['access_token'], json_response['refresh_token']]
-# render(request, "mytest.html",) #
+    return render(request, "personal_page.html", {
+        'repos_list': repos,
+        # "r": r,
+        "my_books": books,
+        "login": login,
+        "count_repos": count_repos,
+    })

@@ -8,11 +8,25 @@
     {{ user }}
 
     {% if user.is_authenticated %}
+        {% csrf_token %}
         <a href="{% url 'logout' %}">Logout</a>
-        <h3>+ GitHub login</h3>
-        <a href="{% url 'my-test' %}">AAAAAAAAAAAAAAAAAAAA</a>
+        <h3>+ GitHub info</h3>
+        <a href="{{ url }}">Получить данные с GitHub</a>
+        <br>
+        <br>
+        <h5>Список прочитанных книг: {{ my_books }}</h5>
+        <br>
+        <h5>GitHub аккаунт: {{ login }}</h5>
+
+        <h5>Количество проектов: {{ count_repos }}</h5>
+
+        <h5>Список проектов: {{ repos_list }}</h5>
+        <br>
+        {{ r }}
     {% else %}
         <a href="{% url 'login' %}">Login</a>
+        <br>
+        <h5>Список всех книг: {{ my_books }}</h5>
     {% endif %}
 
 {% endblock %}
