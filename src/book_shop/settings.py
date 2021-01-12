@@ -166,3 +166,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": (45 * 60),
     },
 }
+
+
+GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
+GIT_CLIENT_SECRET = "2723cc7ab60c2a1ed7208182bb896909362b88df"

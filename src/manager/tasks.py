@@ -1,7 +1,7 @@
 from celery import shared_task
 from time import sleep, time
 from manager.models import TableAggregate, GitInfo
-from pip._vendor.requests import post, get
+from pip._vendor.requests import get
 from datetime import datetime
 
 

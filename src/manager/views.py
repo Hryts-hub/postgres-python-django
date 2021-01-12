@@ -15,7 +15,7 @@ from manager.models import LikeCommentUser, Comment, Book, Genre, GitInfo
 from manager.models import LikeBookUser as RateBookUser
 
 from pip._vendor.requests import post, get
-from manager.tasks import git_info
+from book_shop.settings import GIT_CLIENT_ID, GIT_CLIENT_SECRET
 
 
 class MyPage(View):
@@ -257,7 +257,7 @@ class UpdateComment(View):
 
 
 def personal_view(request):
-    GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
+
     url = f"https://github.com/login/oauth/authorize?client_id={GIT_CLIENT_ID}"
 
     g_info = 0
@@ -276,8 +276,6 @@ def personal_view(request):
 
 
 def git_callback(request):
-    GIT_CLIENT_ID = "67034e1bad91d3ff3c17"
-    GIT_CLIENT_SECRET = "2723cc7ab60c2a1ed7208182bb896909362b88df"
     code = request.GET.get("code")
     url = f"https://github.com/login/oauth/access_token?" \
           f"client_id={GIT_CLIENT_ID}&client_secret={GIT_CLIENT_SECRET}&code={code}"
